@@ -1,5 +1,5 @@
 {
-  "name": "@vededoc/lapp",
+  "name": "@vededoc/l4app",
   "version": "0.0.1",
   "description": "micro file server",
   "main": "outBin/lapp",
@@ -8,10 +8,16 @@
     "packaging": "rm -rf ./dist && tsc && pkg -t node16-linux dist/main.js -o outBin/lapp.bin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vededoc/l4app.git"
+  },
   "keywords": [
     "log",
     "rotate"
   ],
+  "homepage":"https://github.com/vededoc/l4app#readme"  ,
   "author": "vededoc",
   "license": "MIT",
   "dependencies": {
