@@ -1,0 +1,27 @@
+{
+  "name": "@vededoc/lapp",
+  "version": "0.0.1",
+  "description": "micro file server",
+  "main": "outBin/lapp",
+  "scripts": {
+    "build": "tsc && ./esbuild.sh",
+    "packaging": "rm -rf ./dist && tsc && pkg -t node16-linux dist/main.js -o outBin/lapp.bin",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "log",
+    "rotate"
+  ],
+  "author": "vededoc",
+  "license": "MIT",
+  "dependencies": {
+    "@vededoc/sjsutils": "^0.0.2",
+    "commander": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.22",
+    "esbuild": "^0.17.14",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  }
+}
