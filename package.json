@@ -1,11 +1,11 @@
 {
   "name": "@vededoc/l4app",
   "version": "0.0.1",
-  "description": "micro file server",
+  "description": "lightweight logging utility",
   "main": "outBin/lapp",
   "scripts": {
     "build": "tsc && ./esbuild.sh",
-    "packaging": "rm -rf ./dist && tsc && pkg -t node16-linux dist/main.js -o outBin/lapp.bin",
+    "packaging": "rm -rf ./dist && tsc && pkg -t node16-linux dist/main.js -o outBin/l4app.bin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
 
@@ -14,14 +14,15 @@
     "url": "git+https://github.com/vededoc/l4app.git"
   },
   "keywords": [
-    "log",
-    "rotate"
+    "logging",
+    "rotation",
+    "daily logging"
   ],
   "homepage":"https://github.com/vededoc/l4app#readme"  ,
   "author": "vededoc",
   "license": "MIT",
   "dependencies": {
-    "@vededoc/sjsutils": "^0.0.2",
+    "@vededoc/sjsutils": "^0.0.7",
     "commander": "^10.0.0"
   },
   "devDependencies": {

@@ -2,14 +2,14 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/node': ^16.18.22
-  '@vededoc/sjsutils': ^0.0.2
+  '@vededoc/sjsutils': ^0.0.7
   commander: ^10.0.0
   esbuild: ^0.17.14
   ts-node: ^10.9.1
   typescript: ^5.0.2
 
 dependencies:
-  '@vededoc/sjsutils': 0.0.2
+  '@vededoc/sjsutils': 0.0.7
   commander: 10.0.0
 
 devDependencies:
@@ -261,8 +261,8 @@ packages:
     resolution: {integrity: sha512-LJSIirgASa1LicFGTUFwDY7BfKDtLIbijqDLkH47LxEo/jtdrtiZ4/kLPD99bEQhTcPcuh6KhDllHqRxygJD2w==}
     dev: true
 
-  /@vededoc/sjsutils/0.0.2:
-    resolution: {integrity: sha512-1V69dv6ZGrvXbNXNQiXXscxfw0bdfSWgvxTsvZG/FbNQmQ6LsTUYorvem1cgMR7ewaNfQmlkjjvmCyRUTJL6xw==}
+  /@vededoc/sjsutils/0.0.7:
+    resolution: {integrity: sha512-E0xth2YXNqftOM9jl1/A+uu7YVWeGV4Fyc7kg4IfKSjQKkjvCKtyuIX/xDWacaiDSIG0AwcR3NdPCbe0elQaig==}
     dev: false
 
   /acorn-walk/8.2.0:

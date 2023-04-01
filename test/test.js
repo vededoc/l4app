@@ -1,7 +1,8 @@
+const intervalMs = process.argv[1] ?? 1000
 setInterval(()=>{
     console.info('normal log, ', new Date().toISOString())
-}, 1000)
+}, intervalMs)
 
 setInterval( ()=>{
     console.error('### error log, ', new Date().toISOString())
-}, 3000)
+}, intervalMs)
