@@ -12,7 +12,7 @@ interface AppCfg {
     appArgs: string[]
     workDir: string
     out: string
-    err: string
+    errorOnlyFile: boolean
     screen: boolean
     duration: number
     logs: number
@@ -62,19 +62,18 @@ const Cfg = {} as AppCfg
 function ProcCmdArgs() {
     program
         .argument('<app>', 'application to run')
-        // .option('--app <application>', 'application to start')
-        .option('--out <file-for-stdout>', 'stdout file')
-        .option('--err <file-for-stderr>', 'stderr file')
-        .option('-w, --work-dir <working-dir>', 'stderr file')
-        .option('-s, --screen', 'print out for screen')
+        .option('-w, --work-dir <working-dir>', 'working folder for logging')
+        .option('-e, --error-only-file', 'make file for only error')
         .option('--max-size <size>', 'max log size, default: 10M')
-        .option('--duration <duration>', 'ex) 1d, 24h, default 30d')
-        .option('--logs <max-log-num>', 'max log files, default:30')
-        .option('-z, --zip', 'zip backup logs')
-        .option('--check-interval <time>', 'log file check interval\n'
-            +'Example: --check-interval=1m')
+        .option('--duration <duration>', 'keeping duration for log files. valid values => 1d, 24h, ...\n'
+            +"ex) '--duration 30d' means keeping logs for 30 days")
+        .option('--logs <max-log-num>', 'max log files, default is 30')
+        .option('-z, --zip', 'compress backup logs')
         .option('-n, --name-proc <process-name>', 'change process name, just only valid for nodejs package\n'
-            +'Example: l4app node -n testapp -- test.js')
+            +'ex) l4app node -n testapp -- test.js')
+        .option('-s, --screen', 'print out for screen')
+        .option('--check-interval <time>', 'interval for checking duration, counts, size of log files\n'
+            +"ex) '--check-interval=1m'")
         .option('-- <arguments>', 'application arguments')
         .version('0.0.1')
 
@@ -104,11 +103,11 @@ function ProcCmdArgs() {
 (async ()=>{
     ProcCmdArgs()
     fs.mkdirSync(Cfg.workDir, {recursive: true})
-    if(!Cfg.out) {
-        Cfg.out = 'out.log'
-    }
+
+    Cfg.out = 'output.log'
+
     const outLog = new LogRotate(Cfg.workDir, Cfg.out, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip)
-    const errLog = Cfg.err ? new LogRotate(Cfg.workDir, Cfg.err, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
+    const errLog = Cfg.errorOnlyFile ? new LogRotate(Cfg.workDir, 'error.log', Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
     outLog.setBackupIntervalMs(Cfg.checkInterval)
     if(errLog) errLog.setBackupIntervalMs(Cfg.checkInterval)
 

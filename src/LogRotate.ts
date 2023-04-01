@@ -1,14 +1,14 @@
 import * as path from "path";
 import {ParsedPath} from "path";
 import * as fs from "fs";
-import {DAY_MS, MIN_MS, randomStr} from "@vededoc/sjsutils";
+import {DAY_MS, MIN_MS, randomStr, toDateNums} from "@vededoc/sjsutils";
 const { createGzip } = require('zlib');
 const {promisify} = require('util')
 const { pipeline } = require('stream');
 const {
     createReadStream,
     createWriteStream,
-} = require('node:fs');
+} = require('fs');
 const pipe = promisify(pipeline);
 
 
@@ -61,17 +61,21 @@ export class LogRotate {
     }
 
     writeLog(msg: string) {
-        if(this.wfd < 0 || this.wpos+msg.length > this.maxSize) {
-            this.closeFile()
-            this.newLogFile()
-        }
-
-        if(this.wfd > 0) {
-            const rc = fs.writeSync(this.wfd, msg)
-            // console.info('write rc:', rc, this.wpos+rc)
-            if(rc>0) {
-                this.wpos += rc
+        try {
+            if(this.wfd < 0 || this.wpos+msg.length > this.maxSize) {
+                this.closeFile()
+                this.newLogFile()
             }
+
+            if(this.wfd > 0) {
+                const rc = fs.writeSync(this.wfd, msg)
+                // console.info('write rc:', rc, this.wpos+rc)
+                if(rc>0) {
+                    this.wpos += rc
+                }
+            }
+        } catch (err) {
+
         }
     }
 
@@ -111,37 +115,45 @@ export class LogRotate {
         }
         this.backupTimer = setInterval(()=>{
             // console.info('on check timer')
-            if(!fs.existsSync(this.fullPath)) {
-                this.closeFile()
-                this.openFile()
+            try {
+                if(!fs.existsSync(this.fullPath)) {
+                    this.closeFile()
+                    this.openFile()
+                }
+                const ct = new Date()
+                if(ct.getDate() != this.startDate.getDate()) {
+                    // console.info('date changed, new log file, ', ct.toLocaleString())
+                    this.startDate = ct; this.dateIdx = 0;
+                    this.closeFile()
+                    this.newLogFile()
+                }
+            } catch (err) {
+                console.error(err)
             }
-            const ct = new Date()
-            if(ct.getDate() != this.startDate.getDate()) {
-                // console.info('date changed, new log file, ', ct.toLocaleString())
-                this.startDate = ct; this.dateIdx = 0;
-                this.closeFile()
-                this.newLogFile()
-            }
-            
-            // 오래된 파일들을 지운다
-            const remains = this.deleteExpired()
 
-            const dels = remains.length - this.maxFiles
-            if(dels > 0) { // 최대 파일 개수 초과시 오래된 것 순으로 지운다
-                // console.info('max log file count exceed, count=%d', dels)
-                remains.sort( (a, b) =>  ( a.bt.getTime() - b.bt.getTime() ) )
-                for(let i=0;i<dels;i++) {
-                    const t = remains.shift()
-                    try {
-                        if(t.name != this.fullPath) {
-                            // console.info('delete log file early, %s', t.name)
-                            fs.unlinkSync(t.name)
+            // 오래된 파일들을 지운다
+            try {
+                const remains = this.deleteExpired()
+                const dels = remains.length - this.maxFiles
+                if(dels > 0) { // 최대 파일 개수 초과시 오래된 것 순으로 지운다
+                    // console.info('max log file count exceed, count=%d', dels)
+                    remains.sort( (a, b) =>  ( a.bt.getTime() - b.bt.getTime() ) )
+                    for(let i=0;i<dels;i++) {
+                        const t = remains.shift()
+                        try {
+                            if(t.name != this.fullPath) {
+                                // console.info('delete log file early, %s', t.name)
+                                fs.unlinkSync(t.name)
+                            }
+                        } catch (err) {
+                            console.trace(err)
                         }
-                    } catch (err) {
-                        console.trace(err)
                     }
                 }
+            } catch (err) {
+                console.error(err)
             }
+
 
         }, this.backupIntervalMs)
     }
@@ -171,25 +183,50 @@ export class LogRotate {
         }
     }
 
+    private isBaseExists(baseName) {
+        if(!fs.existsSync(this.workDir+'/'+baseName+'.log') && !fs.existsSync(this.workDir+'/'+baseName+'.log.gz')) {
+            return false
+        } else {
+            return true
+        }
+    }
+
+    private getBackupName2() {
+        const dn = toDateNums(this.startDate).slice(4,8)
+        let baseName = `${this.parsedPath.name}_${dn}`
+        if(!this.isBaseExists(baseName)) {
+            return baseName
+        }
+
+        baseName = baseName + '_' + toDateNums(new Date()).slice(8, 12);
+        let cn: string
+        for(let i=1;;i++) {
+            cn = baseName+'_'+i.toString()
+            // console.info('idx fn:', baseName)
+            if(!this.isBaseExists(cn)) {
+                break;
+            }
+        }
+        return cn
+    }
+
     private newLogFile() {
-        const backupName = this.getBackupName()
+        // const backupName = this.getBackupName()
+        const backupName = this.workDir+'/'+this.getBackupName2()
         try {
             if(!this.compress) {
-                // console.info(`${this.fullPath} backup to ${backupName}.log`)
+                console.info(`${this.fullPath} backup to ${backupName}.log`)
                 fs.renameSync(this.fullPath, backupName+'.log')
             } else {
                 const tmpName = backupName+'.log'
                 fs.renameSync(this.fullPath, tmpName)
-                // console.info(`${this.fullPath} backup to ${tmpName}`)
+                console.info(`${this.fullPath} backup to ${tmpName}`)
                 this.compressFileSync(tmpName, backupName+'.log.gz')
             }
         } catch (err) {
             console.trace(err)
-            process.exit(1)
         }
         this.openFile()
-        const st = fs.statSync(this.fullPath)
-        // console.info('path=%s, new file, size:', this.fullPath, st.size)
     }
 
     private compressFileSync(inFile:string, outFile: string) {
