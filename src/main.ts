@@ -136,19 +136,17 @@ function ProcCmdArgs() {
     // console.info('app:', Cfg.app, ', args:', Cfg.appArgs)
     const proc = await child_process.spawn(Cfg.app, Cfg.appArgs)
     proc.stdout.on('data', data => {
-        const ds = data.toString()
-        outLog.writeLog(ds)
+        outLog.writeLog(data)
         if(Cfg.screen) {
-            process.stdout.write(ds)
+            process.stdout.write(data)
         }
     })
     proc.stderr.on('data', data => {
-        const ds = data.toString()
         if(errLog) {
-            errLog.writeLog(ds)
+            errLog.writeLog(data)
         }
         if (Cfg.screen) {
-            process.stderr.write(ds)
+            process.stderr.write(data)
         }
     })
 
