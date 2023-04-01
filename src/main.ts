@@ -3,7 +3,7 @@ import * as process from "process";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
-import {resolveDayTime, resolveSize, runCmd, splitSpace} from "@vededoc/sjsutils";
+import {resolveDayTime, resolveSize, splitSpace} from "@vededoc/sjsutils";
 import * as path from "path";
 
 interface AppCfg {
@@ -125,8 +125,7 @@ function ProcCmdArgs() {
             }
 
             const script = `process.title='${Cfg.nameProc}'; require('${Cfg.appArgs[0]}')`
-            const args = ['-e', script, ...Cfg.appArgs.slice(1)]
-            Cfg.appArgs = args;
+            Cfg.appArgs = ['-e', script, ...Cfg.appArgs.slice(1)]
         } catch (err) {
             console.warn('Fail: cannot change proc name, ', err.message)
             process.exit(1)
