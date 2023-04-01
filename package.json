@@ -2,7 +2,8 @@
   "name": "@vededoc/l4app",
   "version": "0.0.1",
   "description": "lightweight logging utility",
-  "main": "outBin/lapp",
+  "main": "outBin/l4app",
+  "bin": "outBin/l4app",
   "scripts": {
     "build": "tsc && ./esbuild.sh",
     "packaging": "rm -rf ./dist && tsc && pkg -t node16-linux dist/main.js -o outBin/l4app.bin",
