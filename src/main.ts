@@ -59,6 +59,7 @@ function resolveFile(file: string): string {
 }
 
 const Cfg = {} as AppCfg
+let userProc
 
 function ProcCmdArgs() {
     program
@@ -168,4 +169,20 @@ function ProcCmdArgs() {
         }
         process.exit(code)
     })
+    userProc = proc
 })()
+
+process.on('SIGTERM', ()=> {
+    console.info('on SIGTERM')
+    if(userProc) {
+        userProc.kill('SIGTERM')
+    }
+    process.exit(0)
+})
+process.on('SIGINT', ()=> {
+    console.info('on SIGINT')
+    if(userProc) {
+        userProc.kill('SIGINT')
+    }
+    process.exit(0)
+})
