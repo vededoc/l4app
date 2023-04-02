@@ -23,7 +23,7 @@ export class LogRotate {
     workDir: string
     parsedPath: ParsedPath
     startDate: Date
-    dateIdx: number
+    // dateIdx: number
     compress: boolean
     backupIntervalMs: number
     backupTimer: NodeJS.Timer
@@ -40,11 +40,9 @@ export class LogRotate {
 
         this.maxSize = maxSize
         this.maxFiles = maxLogs
-        // this.outFile = fn
         this.maxDuration = maxDuration
 
         this.startDate = new Date()
-        this.dateIdx = 0;
 
         try {
             this.openFile()
@@ -138,7 +136,6 @@ export class LogRotate {
                 const ct = new Date()
                 if(ct.getDate() != this.startDate.getDate()) {
                     console.info('date changed, new log file, ', ct.toLocaleString())
-                    this.startDate = ct; this.dateIdx = 0;
                     this.closeFile()
                     this.newLogFile()
                 }
@@ -201,7 +198,6 @@ export class LogRotate {
     }
 
     private newLogFile() {
-        // const backupName = this.getBackupName()
         const backupName = this.workDir+'/'+this.getBackupName()
         try {
             if(!this.compress) {
