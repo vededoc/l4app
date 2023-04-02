@@ -98,10 +98,25 @@ export class LogRotate {
 
     private openFile() {
         try {
+            if(this.wfd > 0) {
+                fs.closeSync(this.wfd);
+                this.wfd = -1;
+            }
+            let startTime
+            let fpos
+            try {
+                const st = fs.statSync(this.fullPath)
+                startTime = st.birthtime
+                fpos = st.size
+            } catch (err) {
+                startTime = new Date()
+                fpos = 0
+            }
+
             this.wfd = fs.openSync(this.fullPath, 'a')
-            const st = fs.fstatSync(this.wfd)
-            this.wpos = st.size
-            console.info('open %s, wpos=%d', this.fullPath, this.wpos)
+            this.wpos = fpos;
+            this.startDate = startTime
+            console.info('open %s, wpos=%d, birthTime=%s', this.fullPath, this.wpos, this.startDate)
         } catch (err) {
             console.trace(err)
         }
@@ -114,7 +129,7 @@ export class LogRotate {
             this.backupTimer = null;
         }
         this.backupTimer = setInterval(()=>{
-            // console.info('on check timer')
+            console.info('on check timer, ', new Date().toISOString())
             try {
                 if(!fs.existsSync(this.fullPath)) {
                     this.closeFile()
@@ -122,7 +137,7 @@ export class LogRotate {
                 }
                 const ct = new Date()
                 if(ct.getDate() != this.startDate.getDate()) {
-                    // console.info('date changed, new log file, ', ct.toLocaleString())
+                    console.info('date changed, new log file, ', ct.toLocaleString())
                     this.startDate = ct; this.dateIdx = 0;
                     this.closeFile()
                     this.newLogFile()
@@ -158,31 +173,6 @@ export class LogRotate {
         }, this.backupIntervalMs)
     }
 
-    private getBackupName(): string {
-        const dn = (this.startDate.getMonth()+1).toString().padStart(2, '0')
-            + this.startDate.getDate().toString().padStart(2, '0')
-
-        let bn = `${this.workDir}/${this.parsedPath.name}_${dn}`
-        let i: number = 0
-        let subname = ''
-        const ext = this.compress ? '.log.gz' : '.log'
-        for(;;) {
-            try {
-                fs.statSync(bn + subname + ext)
-                i++
-                subname = '_'+i
-            } catch (err) {
-                if(err.code == 'ENOENT') {
-                    return bn+subname
-                } else {
-                    const rn = randomStr(32)
-                    return `${bn}_${rn}`
-                }
-            }
-
-        }
-    }
-
     private isBaseExists(baseName) {
         if(!fs.existsSync(this.workDir+'/'+baseName+'.log') && !fs.existsSync(this.workDir+'/'+baseName+'.log.gz')) {
             return false
@@ -191,7 +181,7 @@ export class LogRotate {
         }
     }
 
-    private getBackupName2() {
+    private getBackupName() {
         const dn = toDateNums(this.startDate).slice(4,8)
         let baseName = `${this.parsedPath.name}_${dn}`
         if(!this.isBaseExists(baseName)) {
@@ -212,7 +202,7 @@ export class LogRotate {
 
     private newLogFile() {
         // const backupName = this.getBackupName()
-        const backupName = this.workDir+'/'+this.getBackupName2()
+        const backupName = this.workDir+'/'+this.getBackupName()
         try {
             if(!this.compress) {
                 console.info(`${this.fullPath} backup to ${backupName}.log`)
@@ -252,7 +242,7 @@ export class LogRotate {
                     if(this.fullPath != fullPath ) {
                         const st = fs.statSync(fullPath)
                         if (ct.getTime() - st.birthtime.getTime() > this.maxDuration) {
-                            // console.info('delete log, %s', fullPath)
+                            console.info('delete log, %s, duration=%d', fullPath, this.maxDuration)
                             fs.unlinkSync(fullPath)
                         } else {
                             remains.push({name: fullPath, bt: st.birthtime})

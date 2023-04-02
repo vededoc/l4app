@@ -123,9 +123,11 @@ function ProcCmdArgs() {
             if(resolveFile(Cfg.appArgs[0]) != 'js') {
                 throw Error('first argument must be script file')
             }
-
-            const script = `process.title='${Cfg.nameProc}'; require('${Cfg.appArgs[0]}')`
-            Cfg.appArgs = ['-e', script, ...Cfg.appArgs.slice(1)]
+            const abs = fs.realpathSync(Cfg.appArgs[0])
+            // const script = `process.title='${Cfg.nameProc}'; require('${Cfg.appArgs[0]}')`
+            const script = `process.title='${Cfg.nameProc}'; require('${abs}')`
+            // Cfg.appArgs = ['-e', script, ...Cfg.appArgs.slice(1)]
+            Cfg.appArgs = ['-e', script, ...Cfg.appArgs]
         } catch (err) {
             console.warn('Fail: cannot change proc name, ', err.message)
             process.exit(1)
