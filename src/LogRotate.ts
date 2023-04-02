@@ -157,7 +157,7 @@ export class LogRotate {
                         const t = remains.shift()
                         try {
                             if(t.name != this.fullPath) {
-                                // console.info('delete log file early, %s', t.name)
+                                console.info('delete log file early, %s', t.name)
                                 fs.unlinkSync(t.name)
                             }
                         } catch (err) {
@@ -239,7 +239,7 @@ export class LogRotate {
             if(f.startsWith(this.parsedPath.name)) {
                 try {
                     const fullPath = `${this.workDir}/${f}`
-                    if(this.fullPath != fullPath ) {
+                    if(this.fullPath != fullPath && (fullPath.endsWith('.log') || fullPath.endsWith('.log.gz'))) {
                         const st = fs.statSync(fullPath)
                         if (ct.getTime() - st.birthtime.getTime() > this.maxDuration) {
                             console.info('delete log, %s, duration=%d', fullPath, this.maxDuration)

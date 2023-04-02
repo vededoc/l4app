@@ -102,7 +102,12 @@ function ProcCmdArgs() {
 
 (async ()=>{
     ProcCmdArgs()
-    fs.mkdirSync(Cfg.workDir, {recursive: true})
+    try {
+        fs.accessSync(Cfg.workDir, fs.constants.W_OK)
+    } catch (err){
+        console.error(`### cannot access '${Cfg.workDir}', check permissions`)
+        process.exit(1)
+    }
 
     Cfg.out = 'output.log'
 
