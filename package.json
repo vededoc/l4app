@@ -1,11 +1,12 @@
 {
   "name": "@vededoc/l4app",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "lightweight logging utility",
   "main": "outBin/l4app",
   "bin": "outBin/l4app",
   "scripts": {
     "build": "tsc && ./esbuild.sh",
+    "build_publish": "rm -rf ./outBin && tsc && ./esbuild.sh && npm publish --access=public",
     "packaging": "rm -rf ./dist && tsc && pkg -t node16-linux dist/main.js -o outBin/l4app.bin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
