@@ -5,6 +5,7 @@ import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
 import {resolveDayTime, resolveSize, splitSpace} from "@vededoc/sjsutils";
 import * as path from "path";
+const pkgjs = require('../package.json')
 
 interface AppCfg {
     app: string
@@ -75,7 +76,7 @@ function ProcCmdArgs() {
         .option('--check-interval <time>', 'interval for checking duration, counts, size of log files\n'
             +"ex) '--check-interval=1m'")
         .option('-- <arguments>', 'application arguments')
-        .version('0.0.1')
+        .version(pkgjs.version)
 
     const sepIdx = process.argv.indexOf('--')
     let launcherArgs: string[]
