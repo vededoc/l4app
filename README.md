@@ -33,7 +33,7 @@ $ l4app node -w working_folder -- test.js
 ## Options
 ```text
   -w, --work-dir <working-dir>    working folder for logging
-  -e, --error-only-file           make file for only stderr
+  -e, --error-only-file           make file for only error
   --max-size <size>               max log size, default: 10M
   --duration <duration>           keeping duration for log files. valid values => 1d, 24h, ...
                                   ex) '--duration 30d' means keeping logs for 30 days
@@ -44,9 +44,8 @@ $ l4app node -w working_folder -- test.js
   -s, --screen                    print out for screen
   --check-interval <time>         interval for checking duration, counts, size of log files
                                   ex) '--check-interval=1m'
+  -p, --prefix <prefx>            prefix for log file
   -- <arguments>                  application arguments
   -V, --version                   output the version number
   -h, --help                      display help for command
-
-
 ```
