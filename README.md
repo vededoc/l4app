@@ -18,6 +18,10 @@ $ sudo npm i -g @vededoc/l4app
 ```
 
 ## Usage
+After '--', pass over your application arguments.  
+For example, 'ls -al' is  
+$ l4app **ls** -- **-al**
+
 ```shell
 # max log files is 10, duration for keeping log files is 30day, max file size is 1mega 
 $ l4app your_app -w working_folder --duration 30d --max-size 1M --max-logs 10 -- arg1 arg2

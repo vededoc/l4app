@@ -12,7 +12,6 @@ interface AppCfg {
     maxSize: number
     appArgs: string[]
     workDir: string
-    out: string
     errorOnlyFile: boolean
     screen: boolean
     duration: number
@@ -20,6 +19,7 @@ interface AppCfg {
     checkInterval: number
     zip: boolean
     nameProc: string
+    prefix: string
 
     outWst: fs.WriteStream
     errWst: fs.WriteStream
@@ -75,6 +75,7 @@ function ProcCmdArgs() {
         .option('-s, --screen', 'print out for screen')
         .option('--check-interval <time>', 'interval for checking duration, counts, size of log files\n'
             +"ex) '--check-interval=1m'")
+        .option('-p, --prefix <prefx>', 'prefix for log file')
         .option('-- <arguments>', 'application arguments')
         .version(pkgjs.version)
 
@@ -110,10 +111,10 @@ function ProcCmdArgs() {
         process.exit(1)
     }
 
-    Cfg.out = 'output.log'
-
-    const outLog = new LogRotate(Cfg.workDir, Cfg.out, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip)
-    const errLog = Cfg.errorOnlyFile ? new LogRotate(Cfg.workDir, 'error.log', Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
+    const output_name = Cfg.prefix ? `${Cfg.prefix}_output.log` : 'output.log'
+    const error_name = Cfg.prefix ? `${Cfg.prefix}_error.log` : 'error.log'
+    const outLog = new LogRotate(Cfg.workDir, output_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip)
+    const errLog = Cfg.errorOnlyFile ? new LogRotate(Cfg.workDir, error_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
     outLog.setBackupIntervalMs(Cfg.checkInterval)
     if(errLog) errLog.setBackupIntervalMs(Cfg.checkInterval)
 
