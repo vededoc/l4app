@@ -185,7 +185,7 @@ export class LogRotate {
             return baseName
         }
 
-        baseName = baseName + '_' + toDateNums(new Date()).slice(8, 12);
+        baseName = baseName + '_' + toDateNums(new Date()).slice(6, 12);
         let cn: string
         for(let i=1;;i++) {
             cn = baseName+'_'+i.toString()
