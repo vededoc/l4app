@@ -5,6 +5,10 @@ import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
 import {resolveDayTime, resolveSize, splitSpace} from "@vededoc/sjsutils";
 import * as path from "path";
+import * as net from "net";
+import * as stream from "stream";
+import * as os from "os";
+import {gCtrl} from "./Ctrl";
 const pkgjs = require('../package.json')
 
 interface AppCfg {
@@ -20,6 +24,7 @@ interface AppCfg {
     zip: boolean
     nameProc: string
     prefix: string
+    kill: boolean | string
 
     outWst: fs.WriteStream
     errWst: fs.WriteStream
@@ -58,12 +63,20 @@ function resolveFile(file: string): string {
     return res
 }
 
+function getCtrlPath() {
+    if(os.platform() == 'win32') {
+        return path.join('\\\\.\\pipe\\', Cfg.workDir, '.l4appctl')
+    } else {
+        return path.join(Cfg.workDir, '.l4appctl')
+    }
+}
+
 const Cfg = {} as AppCfg
 let userProc
 
 function ProcCmdArgs() {
     program
-        .argument('<app>', 'application to run')
+        .argument('[app]', 'application to run')
         .option('-w, --work-dir <working-dir>', 'working folder for logging')
         .option('-e, --error-only-file', 'make file for only error')
         .option('--max-size <size>', 'max log size, default: 10M')
@@ -77,6 +90,7 @@ function ProcCmdArgs() {
         .option('--check-interval <time>', 'interval for checking duration, counts, size of log files\n'
             +"ex) '--check-interval=1m'")
         .option('-p, --prefix <prefx>', 'prefix for log file')
+        .option('-k, --kill [working-folder]', 'kill app')
         .option('-- <arguments>', 'application arguments')
         .version(pkgjs.version)
 
@@ -103,8 +117,66 @@ function ProcCmdArgs() {
     Cfg.checkInterval = resolveDayTime( (Cfg.checkInterval??'1m') as string)
 }
 
+function startCtrlServer() {
+    const ctrl = getCtrlPath()
+    const cnn = net.connect(ctrl ,() => {
+        console.info('connected')
+
+    })
+    cnn.on('data', () => {
+
+    })
+}
+
+async function sendCtrlCmd(cmd: string, args?: string[]) {
+    const pm = new Promise((res, rej) => {
+        const ctrl = getCtrlPath()
+        const cnn = net.connect(ctrl ,() => {
+            console.info('connected')
+            cnn.write(JSON.stringify({cmd}).toString())
+        })
+        cnn.on('data', data => {
+            const res = JSON.parse( data.toString())
+            if(res.code === 'OK') {
+                res(res.code)
+            } else {
+                throw Error(res.code)
+            }
+        })
+    })
+
+    const res = await pm
+    console.info(res)
+}
+
 (async ()=>{
     ProcCmdArgs()
+    gCtrl.init(Cfg.workDir)
+
+    if(Cfg.kill) {
+        const workDir = Cfg.kill === true ? Cfg.workDir : Cfg.kill
+        console.info('command work-dir:', workDir)
+        const resp = await gCtrl.send({cmd: 'kill', workDir})
+        console.info(resp.code)
+        if(resp.code !== 'OK') {
+            process.exit(1)
+        }
+        process.exit(0)
+    }
+
+    gCtrl.startServer()
+    gCtrl.onCmd = (cnn, req) => {
+        console.info('recv cmd:', req.cmd)
+        if(req.cmd == 'kill') {
+            if(req.workDir != Cfg.workDir) {
+                cnn.write(JSON.stringify({code: 'FAIL'})+'\n')
+                return
+            }
+            userProc.kill('SIGTERM')
+            gCtrl.response(cnn, {code: 'OK'})
+        }
+    }
+
     try {
         fs.accessSync(Cfg.workDir, fs.constants.W_OK)
     } catch (err){
