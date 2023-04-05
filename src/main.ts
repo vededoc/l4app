@@ -151,31 +151,31 @@ async function sendCtrlCmd(cmd: string, args?: string[]) {
 
 (async ()=>{
     ProcCmdArgs()
-    gCtrl.init(Cfg.workDir)
-
-    if(Cfg.kill) {
-        const workDir = Cfg.kill === true ? Cfg.workDir : Cfg.kill
-        console.info('command work-dir:', workDir)
-        const resp = await gCtrl.send({cmd: 'kill', workDir})
-        console.info(resp.code)
-        if(resp.code !== 'OK') {
-            process.exit(1)
-        }
-        process.exit(0)
-    }
-
-    gCtrl.startServer()
-    gCtrl.onCmd = (cnn, req) => {
-        console.info('recv cmd:', req.cmd)
-        if(req.cmd == 'kill') {
-            if(req.workDir != Cfg.workDir) {
-                cnn.write(JSON.stringify({code: 'FAIL'})+'\n')
-                return
-            }
-            userProc.kill('SIGTERM')
-            gCtrl.response(cnn, {code: 'OK'})
-        }
-    }
+    // gCtrl.init(Cfg.workDir)
+    //
+    // if(Cfg.kill) {
+    //     const workDir = Cfg.kill === true ? Cfg.workDir : Cfg.kill
+    //     console.info('command work-dir:', workDir)
+    //     const resp = await gCtrl.send({cmd: 'kill', workDir})
+    //     console.info(resp.code)
+    //     if(resp.code !== 'OK') {
+    //         process.exit(1)
+    //     }
+    //     process.exit(0)
+    // }
+    //
+    // gCtrl.startServer()
+    // gCtrl.onCmd = (cnn, req) => {
+    //     console.info('recv cmd:', req.cmd)
+    //     if(req.cmd == 'kill') {
+    //         if(req.workDir != Cfg.workDir) {
+    //             cnn.write(JSON.stringify({code: 'FAIL'})+'\n')
+    //             return
+    //         }
+    //         userProc.kill('SIGTERM')
+    //         gCtrl.response(cnn, {code: 'OK'})
+    //     }
+    // }
 
     try {
         fs.accessSync(Cfg.workDir, fs.constants.W_OK)

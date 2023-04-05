@@ -104,7 +104,8 @@ export class LogRotate {
             let fpos
             try {
                 const st = fs.statSync(this.fullPath)
-                startTime = st.birthtime
+                // In some os, birthtime is newer than atime ( ex: centos )
+                startTime = st.birthtime.getTime() > st.atime.getTime() ? st.atime: st.birthtime
                 fpos = st.size
             } catch (err) {
                 startTime = new Date()
@@ -179,13 +180,13 @@ export class LogRotate {
     }
 
     private getBackupName() {
-        const dn = toDateNums(this.startDate).slice(4,8)
+        const dn = toDateNums(this.startDate).slice(4,8) // date -> MMDD
         let baseName = `${this.parsedPath.name}_${dn}`
-        if(!this.isBaseExists(baseName)) {
-            return baseName
-        }
+        // if(!this.isBaseExists(baseName)) {
+        //     return baseName
+        // }
 
-        baseName = baseName + '_' + toDateNums(new Date()).slice(6, 12);
+        baseName = baseName + '_' + toDateNums(new Date()).slice(6, 12); // date -> DDHHMMSS
         let cn: string
         for(let i=1;;i++) {
             cn = baseName+'_'+i.toString()

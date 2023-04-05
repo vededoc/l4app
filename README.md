@@ -30,6 +30,18 @@ $ l4app your_app -w working_folder --duration 30d --max-size 1M --max-logs 10 --
 $ l4app node -w working_folder -- test.js
 ```
 
+## Log file naming rule
+
+```text
+{prefix}_output_{START_DATE}__{END_DATE}_{INDEX}.log
+```
+
+`prefix` is from commaind line option ( `--prefix`, default is none )  
+`START_DATE` is date-time of logging start date-time. format is 'MMDD'   
+`END_DATE` is date-time of logging last date-time. format is 'MMHHMM'  
+`INDEX` is 1,2,3,... for the same date-time
+
+
 ## Options
 ```text
   -w, --work-dir <working-dir>    working folder for logging
