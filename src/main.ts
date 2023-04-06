@@ -3,7 +3,7 @@ import * as process from "process";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
-import {resolveDayTime, resolveSize, splitSpace} from "@vededoc/sjsutils";
+import {DAY_MS, resolveDayTime, resolveSize, SIZE_KILO, SIZE_MEGA, splitSpace} from "@vededoc/sjsutils";
 import * as path from "path";
 import {gCtrl} from "./Ctrl";
 const pkgjs = require('../package.json')
@@ -23,6 +23,7 @@ interface AppCfg {
     prefix: string
     kill: boolean | string
     set: boolean
+    get: boolean
 
     outWst: fs.WriteStream
     errWst: fs.WriteStream
@@ -84,6 +85,7 @@ function ProcCmdArgs() {
         .option('-p, --prefix <prefx>', 'prefix for log file')
         .option('-k, --kill', 'kill app')
         .option('--set', 'change log setting on the fly and terminate')
+        .option('--get', 'get current log settings')
         .option('--disable-zip', 'disable compress')
         .option('-- <arguments>', 'application arguments')
         .version(pkgjs.version)
@@ -156,6 +158,18 @@ async function ProcCtrlCmd() {
             const res = await gCtrl.send({cmd: 'set', workDir, logs, maxSize, checkInterval, duration, zip})
             console.info(res.code)
             process.exit(0)
+        } else if(Cfg.get) {
+            const res = await gCtrl.send({cmd: 'get', workDir})
+            if(res?.code == 'OK') {
+                console.info('maxSize=%s, logs=%s, duration=%s', res.maxSize, res.logs, res.duration)
+            } else {
+                console.error('FAIL')
+            }
+            process.exit(0)
+        }
+        else {
+            console.error('UNKNOWN')
+            process.exit(1)
         }
     } catch (err) {
         console.error(err)
@@ -167,7 +181,7 @@ async function ProcCtrlCmd() {
 async function Main() {
     ProcCmdArgs()
 
-    if(Cfg.kill || Cfg.set) {
+    if(Cfg.kill || Cfg.set || Cfg.get) {
         await ProcCtrlCmd() // process must be terminated in ProcCtrlCmd()
         process.exit(1)
     }
@@ -205,8 +219,8 @@ async function Main() {
                     if(gErrLog) gErrLog.setDuration(req.duration)
                 }
                 if(req.checkInterval !== undefined) {
-                    gOutLog.setBackupIntervalMs(req.checkInterval)
-                    if(gErrLog) gErrLog.setBackupIntervalMs(req.checkInterval)
+                    gOutLog.setCheckIntervalMs(req.checkInterval)
+                    if(gErrLog) gErrLog.setCheckIntervalMs(req.checkInterval)
                 }
                 if(req.zip !== undefined) {
                     console.debug('use zip:', req.zip)
@@ -214,7 +228,13 @@ async function Main() {
                     if(gErrLog) gErrLog.setCompress(req.zip)
                 }
                 gCtrl.response(cnn, {code: 'OK'})
-            } else {
+            } else if(req.cmd == 'get') {
+                const maxSize = (gOutLog.maxSize/SIZE_KILO).toFixed(1)+'k'
+                const logs = gOutLog.logs
+                const duration = (gOutLog.duration/DAY_MS).toFixed(1)+'d'
+                gCtrl.response(cnn, {code:'OK', maxSize, logs, duration})
+            }
+            else {
                 gCtrl.response(cnn, {code: 'FAIL'})
             }
         } catch (err) {
@@ -233,8 +253,8 @@ async function Main() {
     const error_name = Cfg.prefix ? `${Cfg.prefix}_error.log` : 'error.log'
     gOutLog = new LogRotate(Cfg.workDir, output_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip)
     gErrLog = Cfg.errorOnlyFile ? new LogRotate(Cfg.workDir, error_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
-    gOutLog.setBackupIntervalMs(Cfg.checkInterval)
-    if(gErrLog) gErrLog.setBackupIntervalMs(Cfg.checkInterval)
+    gOutLog.setCheckIntervalMs(Cfg.checkInterval)
+    if(gErrLog) gErrLog.setCheckIntervalMs(Cfg.checkInterval)
 
     if(Cfg.nameProc) {
         try {

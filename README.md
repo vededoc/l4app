@@ -69,9 +69,9 @@ $ l4app -k [working_folder]
   -p, --prefix <prefx>            prefix for log file
   -k, --kill                      kill app
   --set                           change log setting on the fly and terminate
+  --get                           get current log settings
   --disable-zip                   disable compress
   -- <arguments>                  application arguments
   -V, --version                   output the version number
   -h, --help                      display help for command
-
 ```

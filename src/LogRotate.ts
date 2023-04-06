@@ -18,29 +18,29 @@ export class LogRotate {
     wpos: number
     fullPath: string
     maxSize: number
-    maxDuration: number
-    maxFiles: number
+    duration: number
+    logs: number
     workDir: string
     parsedPath: ParsedPath
     startDate: Date
     // dateIdx: number
-    compress: boolean
-    backupIntervalMs: number
+    zip: boolean
+    checkIntervalMs: number
     backupTimer: NodeJS.Timer
 
-    constructor(workDir: string, fn: string, maxSize: number=1024*1024, maxDuration: number=DAY_MS*30, maxLogs: number=100, compress:boolean = false) {
+    constructor(workDir: string, fn: string, maxSize: number=1024*1024, duration: number=DAY_MS*30, logs: number=100, zip:boolean = false) {
         this.wfd = -1;
         this.wpos = 0;
-        this.compress = compress
-        this.backupIntervalMs = MIN_MS * 10;
+        this.zip = zip
+        this.checkIntervalMs = MIN_MS * 10;
         this.workDir = workDir
         this.parsedPath = path.parse(fn)
         this.fullPath = `${workDir}/${fn}`
 
 
         this.maxSize = maxSize
-        this.maxFiles = maxLogs
-        this.maxDuration = maxDuration
+        this.logs = logs
+        this.duration = duration
 
         this.startDate = new Date()
 
@@ -55,21 +55,21 @@ export class LogRotate {
 
 
     setCompress(enable: boolean) {
-        this.compress = enable
+        this.zip = enable
     }
     setMaxLogs(cnt: number) {
-        this.maxFiles = cnt
+        this.logs = cnt
     }
     setMaxSize(size: number) {
         this.maxSize = size
     }
 
     setDuration(dur: number) {
-        this.maxDuration = dur
+        this.duration = dur
     }
 
-    setBackupIntervalMs(ms: number) {
-        this.backupIntervalMs = ms
+    setCheckIntervalMs(ms: number) {
+        this.checkIntervalMs = ms
         this.startCheckTime()
     }
 
@@ -140,7 +140,7 @@ export class LogRotate {
 
     private startCheckTime() {
         if(this.backupTimer) {
-            clearInterval(this.backupIntervalMs)
+            clearInterval(this.checkIntervalMs)
             this.backupTimer = null;
         }
         this.backupTimer = setInterval(()=>{
@@ -163,7 +163,7 @@ export class LogRotate {
             // 오래된 파일들을 지운다
             try {
                 const remains = this.deleteExpired()
-                const dels = remains.length - this.maxFiles
+                const dels = remains.length - this.logs
                 if(dels > 0) { // 최대 파일 개수 초과시 오래된 것 순으로 지운다
                     // console.info('max log file count exceed, count=%d', dels)
                     remains.sort( (a, b) =>  ( a.bt.getTime() - b.bt.getTime() ) )
@@ -184,7 +184,7 @@ export class LogRotate {
             }
 
 
-        }, this.backupIntervalMs)
+        }, this.checkIntervalMs)
     }
 
     private isBaseExists(baseName) {
@@ -217,7 +217,7 @@ export class LogRotate {
     private newLogFile() {
         const backupName = this.workDir+'/'+this.getBackupName()
         try {
-            if(!this.compress) {
+            if(!this.zip) {
                 console.info(`${this.fullPath} backup to ${backupName}.log`)
                 fs.renameSync(this.fullPath, backupName+'.log')
             } else {
@@ -254,8 +254,8 @@ export class LogRotate {
                     const fullPath = `${this.workDir}/${f}`
                     if(this.fullPath != fullPath && (fullPath.endsWith('.log') || fullPath.endsWith('.log.gz'))) {
                         const st = fs.statSync(fullPath)
-                        if (ct.getTime() - st.birthtime.getTime() > this.maxDuration) {
-                            console.info('delete log, %s, duration=%d', fullPath, this.maxDuration)
+                        if (ct.getTime() - st.birthtime.getTime() > this.duration) {
+                            console.info('delete log, %s, duration=%d', fullPath, this.duration)
                             fs.unlinkSync(fullPath)
                         } else {
                             remains.push({name: fullPath, bt: st.birthtime})
