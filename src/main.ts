@@ -3,7 +3,7 @@ import * as process from "process";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
-import {DAY_MS, resolveDayTime, resolveSize, SIZE_KILO, SIZE_MEGA, splitSpace} from "@vededoc/sjsutils";
+import {DAY_MS, resolveDayTime, resolveSize, SIZE_KILO, splitSpace} from "@vededoc/sjsutils";
 import * as path from "path";
 import {gCtrl} from "./Ctrl";
 const pkgjs = require('../package.json')
