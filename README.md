@@ -27,7 +27,10 @@ $ l4app **ls** -- **-al**
 $ l4app your_app -w working_folder --duration 30d --max-size 1M --max-logs 10 -- arg1 arg2
 
 # for nodejs application
-$ l4app node -w working_folder -- test.js
+$ l4app node -w working_folder -- your_app.js
+
+# run in background
+$ nohup l4app node -- your_app > /dev/null &
 
 # changing log setting on the fly, default working_folder is current folder
 $ l4app --set --max-size 10M --logs 10 [working_folder]
