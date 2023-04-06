@@ -1,6 +1,6 @@
 {
   "name": "@vededoc/l4app",
-  "version": "1.0.0",
+  "version": "1.0.1.alpha.0",
   "description": "lightweight logging utility",
   "main": "outBin/l4app",
   "bin": "outBin/l4app",

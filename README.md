@@ -43,7 +43,7 @@ $ l4app -k [working_folder]
 ## Log file naming rule
 
 ```text
-{prefix}_output_{START_DATE}__{END_DATE}_{INDEX}.log
+{prefix}_output_{START_DATE}_{END_DATE}_{INDEX}.log
 ```
 
 `prefix` is from commaind line option ( `--prefix`, default is none )  
