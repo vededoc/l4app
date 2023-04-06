@@ -172,7 +172,7 @@ async function ProcCtrlCmd() {
             process.exit(1)
         }
     } catch (err) {
-        console.error(err)
+        console.error('FAIL:', err.message)
         process.exit(1)
     }
 }
