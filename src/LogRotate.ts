@@ -53,6 +53,21 @@ export class LogRotate {
         this.startCheckTime()
     }
 
+
+    setCompress(enable: boolean) {
+        this.compress = enable
+    }
+    setMaxLogs(cnt: number) {
+        this.maxFiles = cnt
+    }
+    setMaxSize(size: number) {
+        this.maxSize = size
+    }
+
+    setDuration(dur: number) {
+        this.maxDuration = dur
+    }
+
     setBackupIntervalMs(ms: number) {
         this.backupIntervalMs = ms
         this.startCheckTime()
@@ -76,6 +91,7 @@ export class LogRotate {
 
         }
     }
+
 
     close() {
         this.closeFile()
@@ -128,7 +144,7 @@ export class LogRotate {
             this.backupTimer = null;
         }
         this.backupTimer = setInterval(()=>{
-            console.info('on check timer, ', new Date().toISOString())
+            // console.info('on check timer, ', new Date().toISOString())
             try {
                 if(!fs.existsSync(this.fullPath)) {
                     this.closeFile()

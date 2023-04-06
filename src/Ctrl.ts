@@ -5,11 +5,12 @@ import * as fs from "fs";
 import * as Stream from "stream";
 import * as readline from "readline";
 
-const IPC_FILE = 'l4appipc.sock'
+const IPC_FILE = '.l4app.sock'
 class Ctrl {
     ctrlServer: net.Server
-    readable: Stream.Readable
+    // readable: Stream.Readable
     ctrlPath: string
+    workDir: string
     onCmd: (cnn: net.Socket, cmd: any) => void
 
 
@@ -18,13 +19,11 @@ class Ctrl {
     }
 
     init(workDir: string) {
-
+        this.workDir = workDir
         if(os.platform() === 'win32') {
             this.ctrlPath = path.join('\\\\.\\pipe\\', workDir, IPC_FILE)
         } else {
             this.ctrlPath = path.join(workDir, IPC_FILE)
-            // this.ctrlPath = '/tmp/.l4appctl'
-            // this.ctrlPath = '/xdd/temp/logs/l4appctl.sock'
         }
     }
 
@@ -33,10 +32,6 @@ class Ctrl {
             console.info('*** server already started')
             return;
         }
-        this.readable = new Stream.Readable( {
-            // read() 는 empty 함수로 라도 정의 해야 한다
-            read() {}
-        })
 
 
         const server = net.createServer();
@@ -48,23 +43,32 @@ class Ctrl {
         }
         server.on('connection', cnn => {
             // console.info('on new connection')
-            const rl = readline.createInterface(this.readable)
+            const readable = new Stream.Readable( {
+                // read() 는 empty 함수로 라도 정의 해야 한다
+                read() {}
+            })
+
+            const rl = readline.createInterface(readable)
             rl.on('line', line => {
                 // process.stdout.write(line)
                 const cmd = JSON.parse(line)
+                if(cmd.workDir != this.workDir) {
+                    console.info('*** workDir not match, this.workDir=%s, msg.workDir=%s', this.workDir, cmd.workDir)
+                    this.response(cnn, {code: 'FAIL'})
+                }
                 this.onCmd(cnn, cmd)
             })
             rl.on('close', () => {
-                // console.info('on rl close')
+                // console.debug('on rl close')
             })
 
             cnn.on('data', data => {
-                console.info('on data:', data.toString())
-                this.readable.push(data)
+                // console.info('on data:', data.toString())
+                readable.push(data)
             })
             cnn.on('end', () => {
                 // console.info('client disconnected')
-                this.readable.push(null)
+                readable.push(null)
             })
         })
 
@@ -76,11 +80,11 @@ class Ctrl {
 
     async send(cmd: any): Promise<any> {
         return new Promise( (res, rej) => {
-            console.info('connect to ', this.ctrlPath)
+            // console.debug('connect to', this.ctrlPath)
             // const cnn = net.createConnection({path: this.ctrlPath})
             const cnn = net.createConnection({path: this.ctrlPath})
             cnn.on('connect', () => {
-                console.info('connected')
+                // console.debug('connected')
                 cnn.write(JSON.stringify(cmd) +'\n')
             })
             cnn.on('error', err => {

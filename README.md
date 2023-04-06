@@ -28,7 +28,14 @@ $ l4app your_app -w working_folder --duration 30d --max-size 1M --max-logs 10 --
 
 # for nodejs application
 $ l4app node -w working_folder -- test.js
+
+# changing log setting on the fly, default working_folder is current folder
+$ l4app --set --max-size 10M --logs 10 [working_folder]
+
+# kill l4app instance, default working_folder is current folder
+$ l4app -k [working_folder]
 ```
+
 
 ## Log file naming rule
 
@@ -57,7 +64,11 @@ $ l4app node -w working_folder -- test.js
   --check-interval <time>         interval for checking duration, counts, size of log files
                                   ex) '--check-interval=1m'
   -p, --prefix <prefx>            prefix for log file
+  -k, --kill                      kill app
+  --set                           change log setting on the fly and terminate
+  --disable-zip                   disable compress
   -- <arguments>                  application arguments
   -V, --version                   output the version number
   -h, --help                      display help for command
+
 ```
