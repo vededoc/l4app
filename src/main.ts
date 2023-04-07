@@ -3,7 +3,7 @@ import * as process from "process";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
-import {DAY_MS, resolveDayTime, resolveSize, SIZE_KILO, splitSpace} from "@vededoc/sjsutils";
+import {DAY_MS, MIN_MS, resolveDayTime, resolveSize, SIZE_KILO, splitSpace} from "@vededoc/sjsutils";
 import * as path from "path";
 import {gCtrl} from "./Ctrl";
 const pkgjs = require('../package.json')
@@ -161,7 +161,7 @@ async function ProcCtrlCmd() {
         } else if(Cfg.get) {
             const res = await gCtrl.send({cmd: 'get', workDir})
             if(res?.code == 'OK') {
-                console.info('maxSize=%s, logs=%s, duration=%s', res.maxSize, res.logs, res.duration)
+                console.info('maxSize=%s, logs=%s, duration=%s, checkInterval=%s', res.maxSize, res.logs, res.duration, res.checkInterval)
             } else {
                 console.error('FAIL')
             }
@@ -232,7 +232,8 @@ async function Main() {
                 const maxSize = (gOutLog.maxSize/SIZE_KILO).toFixed(1)+'k'
                 const logs = gOutLog.logs
                 const duration = (gOutLog.duration/DAY_MS).toFixed(1)+'d'
-                gCtrl.response(cnn, {code:'OK', maxSize, logs, duration})
+                const checkInterval = (gOutLog.checkIntervalMs/MIN_MS).toFixed(1)+'m'
+                gCtrl.response(cnn, {code:'OK', maxSize, logs, duration, checkInterval})
             }
             else {
                 gCtrl.response(cnn, {code: 'FAIL'})
