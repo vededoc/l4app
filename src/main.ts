@@ -161,7 +161,7 @@ async function ProcCtrlCmd() {
         } else if(Cfg.get) {
             const res = await gCtrl.send({cmd: 'get', workDir})
             if(res?.code == 'OK') {
-                console.info('maxSize=%s, logs=%s, duration=%s, checkInterval=%s', res.maxSize, res.logs, res.duration, res.checkInterval)
+                console.info('maxSize=%s, logs=%s, duration=%s, checkInterval=%s, zip=%s', res.maxSize, res.logs, res.duration, res.checkInterval, res.zip)
             } else {
                 console.error('FAIL')
             }
@@ -233,7 +233,8 @@ async function Main() {
                 const logs = gOutLog.logs
                 const duration = (gOutLog.duration/DAY_MS).toFixed(1)+'d'
                 const checkInterval = (gOutLog.checkIntervalMs/MIN_MS).toFixed(1)+'m'
-                gCtrl.response(cnn, {code:'OK', maxSize, logs, duration, checkInterval})
+                const zip = gOutLog.zip
+                gCtrl.response(cnn, {code:'OK', maxSize, logs, duration, checkInterval, zip})
             }
             else {
                 gCtrl.response(cnn, {code: 'FAIL'})
