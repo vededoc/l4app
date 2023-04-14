@@ -35,6 +35,9 @@ $ nohup l4app node -- your_app > /dev/null &
 # changing log setting on the fly, default working_folder is current folder
 $ l4app --set --max-size 10M --logs 10 [working_folder]
 
+# get current log setting on working-folder
+$ l4app --get [working_folder]
+
 # kill l4app instance, default working_folder is current folder
 $ l4app -k [working_folder]
 ```
