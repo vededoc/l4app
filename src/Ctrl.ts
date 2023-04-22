@@ -22,8 +22,10 @@ class Ctrl {
         this.workDir = workDir
         if(os.platform() === 'win32') {
             this.ctrlPath = path.join('\\\\.\\pipe\\', workDir, IPC_FILE)
+            this.ctrlPath = fs.realpathSync(this.ctrlPath)
         } else {
             this.ctrlPath = path.join(workDir, IPC_FILE)
+            this.ctrlPath = fs.realpathSync(this.ctrlPath)
         }
     }
 
@@ -52,9 +54,11 @@ class Ctrl {
             rl.on('line', line => {
                 // process.stdout.write(line)
                 const cmd = JSON.parse(line)
-                if(cmd.workDir != this.workDir) {
+                const checkPath = path.resolve(this.workDir)
+                if(checkPath != cmd.workDir) {
                     console.info('*** workDir not match, this.workDir=%s, msg.workDir=%s', this.workDir, cmd.workDir)
                     this.response(cnn, {code: 'FAIL'})
+                    return;
                 }
                 this.onCmd(cnn, cmd)
             })

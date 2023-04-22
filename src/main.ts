@@ -106,7 +106,7 @@ function ProcCmdArgs() {
 
 
     Cfg.appArgs = appArgs
-    Cfg.workDir = Cfg.workDir ?? process.cwd()
+    Cfg.workDir = path.resolve( Cfg.workDir ?? process.cwd() )
     Cfg.app = program.args[0]
     Cfg.logs = Number.parseInt((Cfg.logs ?? '30') as string)
     Cfg.duration = resolveDayTime((Cfg.duration ?? '30d') as string)
