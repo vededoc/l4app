@@ -13,7 +13,7 @@ interface AppCfg {
     maxSize: number
     appArgs: string[]
     workDir: string
-    errorOnlyFile: boolean
+    errorFile: boolean
     screen: boolean
     duration: number
     logs: number
@@ -71,7 +71,7 @@ function ProcCmdArgs() {
     program
         .argument('[app]', 'application to run')
         .option('-w, --work-dir <working-dir>', 'working folder for logging')
-        .option('-e, --error-only-file', 'make file for only error')
+        .option('--no-error-file', 'do not make error.log')
         .option('--max-size <size>', 'max log size, default: 10M')
         .option('--duration <duration>', 'keeping duration for log files. valid values => 1d, 24h, ...\n'
             +"ex) '--duration 30d' means keeping logs for 30 days")
@@ -254,7 +254,7 @@ async function Main() {
     const output_name = Cfg.prefix ? `${Cfg.prefix}_output.log` : 'output.log'
     const error_name = Cfg.prefix ? `${Cfg.prefix}_error.log` : 'error.log'
     gOutLog = new LogRotate(Cfg.workDir, output_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip)
-    gErrLog = Cfg.errorOnlyFile ? new LogRotate(Cfg.workDir, error_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
+    gErrLog = Cfg.errorFile ? new LogRotate(Cfg.workDir, error_name, Cfg.maxSize, Cfg.duration, Cfg.logs, Cfg.zip) : undefined
     gOutLog.setCheckIntervalMs(Cfg.checkInterval)
     if(gErrLog) gErrLog.setCheckIntervalMs(Cfg.checkInterval)
 
@@ -288,6 +288,7 @@ async function Main() {
         }
     })
     proc.stderr.on('data', data => {
+        gOutLog.writeLog(data)
         if(gErrLog) {
             gErrLog.writeLog(data)
         }
