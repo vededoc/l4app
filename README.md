@@ -57,17 +57,22 @@ $ l4app -k [working_folder]
 
 ## Options
 ```text
+Options:
   -w, --work-dir <working-dir>    working folder for logging
-  -e, --error-only-file           make file for only error
+  --no-error-file                 do not make error.log
   --max-size <size>               max log size, default: 10M
-  --duration <duration>           keeping duration for log files. valid values => 1d, 24h, ...
-                                  ex) '--duration 30d' means keeping logs for 30 days
+  --duration <duration>           keeping duration for log files. valid values
+                                  => 1d, 24h, ...
+                                  ex) '--duration 30d' means keeping logs for
+                                  30 days
   --logs <max-log-num>            max log files, default is 30
   -z, --zip                       compress backup logs
-  -n, --name-proc <process-name>  change process name, just only valid for nodejs package
+  -n, --name-proc <process-name>  change process name, just only valid for
+                                  nodejs package
                                   ex) l4app node -n testapp -- test.js
   -s, --screen                    print out for screen
-  --check-interval <time>         interval for checking duration, counts, size of log files
+  --check-interval <time>         interval for checking duration, counts, size
+                                  of log files
                                   ex) '--check-interval=1m'
   -p, --prefix <prefx>            prefix for log file
   -k, --kill                      kill app
