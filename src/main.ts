@@ -3,7 +3,7 @@ import * as process from "process";
 import * as child_process from "child_process";
 import * as fs from "fs";
 import {LogRotate} from "./LogRotate";
-import {DAY_MS, MIN_MS, resolveDayTime, resolveSize, SIZE_KILO, splitSpace} from "@vededoc/sjsutils";
+import {DAY_MS, MIN_MS, resolveDayTime, resolveSize, SIZE_KILO, splitSpace, toSqlDate} from "@vededoc/sjsutils";
 import * as path from "path";
 import {gCtrl} from "./Ctrl";
 const pkgjs = require('../package.json')
@@ -290,6 +290,7 @@ async function Main() {
     proc.stderr.on('data', data => {
         gOutLog.writeLog(data)
         if(gErrLog) {
+            gErrLog.writeLog('\n'+toSqlDate(new Date())+' -->\n')
             gErrLog.writeLog(data)
         }
         if (Cfg.screen) {
