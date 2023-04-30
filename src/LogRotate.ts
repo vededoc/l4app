@@ -128,7 +128,7 @@ export class LogRotate {
                 fpos = 0
             }
 
-            this.wfd = fs.openSync(this.fullPath, 'a')
+            this.wfd = fs.openSync(this.fullPath, 'a', 0o644)
             this.wpos = fpos;
             this.startDate = startTime
             console.info('open %s, wpos=%d, birthTime=%s', this.fullPath, this.wpos, this.startDate)

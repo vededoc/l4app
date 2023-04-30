@@ -25,7 +25,7 @@ class Ctrl {
             this.ctrlPath = fs.realpathSync(this.ctrlPath)
         } else {
             this.ctrlPath = path.join(workDir, IPC_FILE)
-            this.ctrlPath = fs.realpathSync(this.ctrlPath)
+            this.ctrlPath = path.resolve(this.ctrlPath)
         }
     }
 
