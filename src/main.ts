@@ -193,7 +193,7 @@ async function Main() {
 
     try {
         if(!fs.existsSync(Cfg.workDir)) {
-            fs.mkdirSync(Cfg.workDir)
+            fs.mkdirSync(Cfg.workDir, {recursive: true})
         }
         fs.accessSync(Cfg.workDir, fs.constants.W_OK)
     } catch (err){
