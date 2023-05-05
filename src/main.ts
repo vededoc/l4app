@@ -191,6 +191,16 @@ async function Main() {
         process.exit(1)
     }
 
+    try {
+        if(!fs.existsSync(Cfg.workDir)) {
+            fs.mkdirSync(Cfg.workDir)
+        }
+        fs.accessSync(Cfg.workDir, fs.constants.W_OK)
+    } catch (err){
+        console.error(`### cannot access '${Cfg.workDir}', check permissions`)
+        process.exit(1)
+    }
+
     gCtrl.init(Cfg.workDir)
     gCtrl.startServer()
     gCtrl.onCmd = (cnn, req) => {
@@ -244,12 +254,7 @@ async function Main() {
         }
     }
 
-    try {
-        fs.accessSync(Cfg.workDir, fs.constants.W_OK)
-    } catch (err){
-        console.error(`### cannot access '${Cfg.workDir}', check permissions`)
-        process.exit(1)
-    }
+
 
     const output_name = Cfg.prefix ? `${Cfg.prefix}_output.log` : 'output.log'
     const error_name = Cfg.prefix ? `${Cfg.prefix}_error.log` : 'error.log'
