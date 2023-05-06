@@ -27,6 +27,7 @@ export class LogRotate {
     zip: boolean
     checkIntervalMs: number
     backupTimer: NodeJS.Timer
+    lastCheckMs = 0;
 
     constructor(workDir: string, fn: string, maxSize: number=1024*1024, duration: number=DAY_MS*30, logs: number=100, zip:boolean = false) {
         this.wfd = -1;
@@ -74,6 +75,7 @@ export class LogRotate {
     }
 
     writeLog(msg: string) {
+
         try {
             if(this.wfd < 0 || this.wpos+msg.length > this.maxSize) {
                 this.closeFile()
@@ -81,14 +83,23 @@ export class LogRotate {
             }
 
             if(this.wfd > 0) {
+                const ct = Date.now();
+                const t = ct - this.lastCheckMs
+                if(t > 1000*5) {
+                    this.lastCheckMs = ct
+                    if(!fs.existsSync(this.fullPath)) {
+                        console.error('### file not exists');
+                        this.closeFile()
+                        this.openFile()
+                    }
+                }
                 const rc = fs.writeSync(this.wfd, msg)
-                // console.info('write rc:', rc, this.wpos+rc)
                 if(rc>0) {
                     this.wpos += rc
                 }
             }
         } catch (err) {
-
+            console.trace(err)
         }
     }
 
@@ -110,6 +121,13 @@ export class LogRotate {
         }
     }
 
+    public reopenFile() {
+        if(this.wfd) {
+            fs.closeSync(this.wfd)
+            this.wfd = -1;
+        }
+        this.openFile();
+    }
     private openFile() {
         try {
             if(this.wfd > 0) {
